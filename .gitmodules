@@ -1,0 +1,3 @@
+[submodule "brickos"]
+	path = brickos
+	url = git@github.com:jnow-87/foo.git
