@@ -1,0 +1,161 @@
+/**
+ * Copyright (C) 2020 Jan Nowotsch
+ * Author Jan Nowotsch	<jan.nowotsch@gmail.com>
+ *
+ * Released under the terms of the GNU GPL v2.0
+ */
+
+
+
+memory = {
+	flash = {
+		baseaddr = 0x0;
+		size = 131072;
+
+		kernel_flash = {
+			baseaddr = 0x0;
+			size = 49152;
+		};
+
+		app_flash = {
+			baseaddr = 0x0000c000;
+			size = 81920;
+		};
+	};
+
+	ram = {
+		baseaddr = 0x00800000;
+		size = 16384;
+
+		registers = {
+			baseaddr = 0x00800000;
+			size = 256;
+		};
+
+		kernel_data = {
+			baseaddr = 0x00800100;
+			size = 4864;
+		};
+
+		kernel_heap = {
+			baseaddr = 0x00801400;
+			size = 2304;
+		};
+
+		kernel_stack = {
+			baseaddr = 0x00801d00;
+			size = 768;
+		};
+
+		app_heap = {
+			baseaddr = 0x00802000;
+			size = 2560;
+		};
+
+		app_data = {
+			baseaddr = 0x00802a00;
+			size = 5632;
+		};
+	};
+};
+
+driver = {
+	uart0 = {
+		compatible = "avr,uart";
+
+		/**
+		 * uart hardware description
+		 * 	has to match the device tree data type
+		 *	of the avr uart driver
+		 */
+		baseaddr = 0xc0;			// uart0 config register base
+
+		reg = [ 0x64 ];				// PRR0
+		int<8> = [ 0x2 ];			// PRR0_PRUSART0
+
+		int<8> = [
+			20,						// uart0 rx interrupt
+			22						// uart0 tx interrupt
+		];
+
+		tty0 = {
+			compatible = "terminal";
+
+			/**
+			 * terminal configuration
+			 * 	has to match the configuration data type of
+			 * 	the underlying device driver
+			 */
+			int<32> = [ 115200 ];	// baudrate
+			int<8> = [
+				1,					// stop bits (1)
+				0,					// parity (TPARITY_NONE)
+				3,					// csize (TCS_8)
+				0					// flags (none)
+			];
+
+			klog = {
+				compatible = "kernel,log";
+			};
+		};
+	};
+
+	uart1 = {
+		compatible = "avr,uart";
+
+		/**
+		 * uart hardware description
+		 * 	has to match the device tree data type
+		 *	of the avr uart driver
+		 */
+		baseaddr = 0xc8;			// uart1 config register base
+
+		reg = [ 0x64 ];				// PRR0
+		int<8> = [ 0x10 ];			// PRR0_PRUSART1
+
+		int<8> = [
+			28,						// uart1 rx interrupt
+			30						// uart1 tx interrupt (disabled)
+		];
+	};
+
+	spi0 = {
+		compatible = "avr,spi";
+
+		/**
+		 * spi hardware description
+		 * 	has to match the device tree data type
+		 *	of the avr spi driver
+		 */
+		baseaddr = 0x4c;			// spi config register base
+
+		reg = [ 0x24 ];				// DDRB
+		int<8> = [
+			0x40,					// PB6 (MISO)
+			0x20,					// PB5 (MOSI)
+			0x80					// PB7 (SCK)
+		];
+
+		reg = [ 0x64 ];				// PRRO
+		int<8> = [ 0x4 ];			// PRR0_PRSPI
+
+		int<8> = [ 19 ];			// interrupt number
+
+		tty1 = {
+			compatible = "terminal";
+
+			/**
+			 * serial configuration
+			 * 	has to match the configuration data type of
+			 * 	the underlying device driver
+			 */
+			int<8> = [
+				1,					// device mode (master)
+				0,					// sample mode (CPOL = 0, CPHA = 0)
+				0,					// data order (MSB first)
+				1,					// prescaler (4)
+				0					// flags (none)
+			];
+		};
+	};
+};
